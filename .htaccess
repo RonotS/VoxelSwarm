@@ -1,0 +1,66 @@
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # ── Block sensitive files and directories ──
+    RewriteRule ^\.ai/ - [F,L]
+    RewriteRule ^\.git/ - [F,L]
+    RewriteRule ^\.env - [F,L]
+    RewriteRule ^src/ - [F,L]
+    RewriteRule ^vendor/ - [F,L]
+    RewriteRule ^node_modules/ - [F,L]
+    RewriteRule ^storage/ - [F,L]
+    RewriteRule ^template/ - [F,L]
+    RewriteRule ^migrations/ - [F,L]
+    RewriteRule ^scripts/ - [F,L]
+    RewriteRule ^views/ - [F,L]
+    RewriteRule ^ui/ - [F,L]
+
+    # Block sensitive root files
+    RewriteRule ^composer\.(json|lock)$ - [F,L]
+    RewriteRule ^package(-lock)?\.json$ - [F,L]
+    RewriteRule ^VERSION$ - [F,L]
+
+    # ── Serve existing files directly (CSS, JS, fonts, icons) ──
+    RewriteCond %{REQUEST_FILENAME} -f
+    RewriteRule ^ - [L]
+
+    # ── Route everything else through the front controller ──
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# ── Security headers ──
+<IfModule mod_headers.c>
+    Header set X-Content-Type-Options "nosniff"
+    Header set X-Frame-Options "SAMEORIGIN"
+    Header set X-XSS-Protection "1; mode=block"
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Compression ──
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css text/javascript application/javascript application/json image/svg+xml
+</IfModule>
+
+# ── Caching for static assets ──
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+</IfModule>
+
+# ── Block dotfiles (except .htaccess and .well-known) ──
+<FilesMatch "^\.(?!htaccess|well-known)">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# ── Block sensitive file types ──
+<FilesMatch "\.(db|sqlite|sqlite3|sql|sh|env|bak|log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>

@@ -1,0 +1,81 @@
+@import "tailwindcss";
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* VoxelSwarm design tokens — extends Tailwind with Precision SaaS palette */
+@theme {
+  --color-sw-bg: #FAFAFA;
+  --color-sw-surface: #FFFFFF;
+  --color-sw-border: #E4E4E7;
+  --color-sw-text: #09090B;
+  --color-sw-muted: #71717A;
+  --color-sw-accent: #EA580C;
+  --color-sw-accent-hover: #C2410C;
+  --color-sw-success: #16A34A;
+  --color-sw-warning: #D97706;
+  --color-sw-error: #DC2626;
+
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  --radius-card: 12px;
+  --radius-input: 8px;
+  --radius-btn: 8px;
+}
+
+@layer utilities {
+  .sw-btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-500 active:scale-[0.98] transition-all relative overflow-hidden border border-orange-700/50;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+  }
+  .sw-btn-primary:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .sw-btn-secondary {
+    @apply px-4 py-2 text-sm font-medium text-zinc-700 dark:text-zinc-300 bg-white dark:bg-[#18181b] border border-zinc-200 dark:border-zinc-800 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all active:scale-[0.98] relative overflow-hidden;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 1), 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .dark .sw-btn-secondary {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  .sw-btn-secondary:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  .dark .sw-btn-secondary:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  }
+
+  .sw-btn-danger {
+    @apply px-4 py-2 text-sm font-medium text-red-600 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/20 rounded-lg hover:bg-red-100 dark:hover:bg-red-500/20 hover:text-red-700 dark:hover:text-red-400 transition-all active:scale-[0.98] relative overflow-hidden focus:ring-2 focus:ring-red-500/50;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 1px 2px rgba(220, 38, 38, 0.05);
+  }
+  .dark .sw-btn-danger {
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .sw-btn-danger:active {
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+  .sw-checkbox {
+    @apply w-4 h-4 text-orange-600 bg-white dark:bg-[#18181b] border border-zinc-300 dark:border-zinc-700 rounded transition-all focus:ring-orange-500/50 focus:ring-offset-0 relative cursor-pointer appearance-none;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05), 0 1px 0 rgba(255, 255, 255, 1);
+  }
+  .dark .sw-checkbox {
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3), 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .sw-checkbox:checked {
+    @apply bg-orange-600 border-orange-600;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -2px 0 rgba(0, 0, 0, 0.1);
+    background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+
+  .sw-select {
+    @apply appearance-none bg-no-repeat pr-10;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2371717a' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.6rem center;
+    background-size: 1.25em 1.25em;
+  }
+  .dark .sw-select {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23a1a1aa' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  }
+}

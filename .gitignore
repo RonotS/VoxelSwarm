@@ -1,0 +1,52 @@
+# ── Dependencies (npm only — vendor/ is committed per spec) ──
+node_modules/
+
+# ── Composer related ──
+/vendor/**/.DS_Store
+/vendor/**/.git
+/vendor/**/.idea
+/vendor/**/.vscode
+/vendor/**/CHANGELOG*
+/vendor/**/README*
+/vendor/**/LICENSE*
+/vendor/**/phpunit.xml*
+/vendor/**/phpcs.xml*
+/vendor/**/.editorconfig
+/vendor/**/.gitattributes
+/vendor/**/.gitignore
+/vendor/**/.scrutinizer.yml
+/vendor/**/.travis.yml
+/vendor/**/.gitkeep
+
+# ── IDE / OS ──
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# ── Runtime data ──
+storage/swarm.db
+storage/swarm.db-wal
+storage/swarm.db-shm
+storage/swarm.db-journal
+storage/logs/*
+!storage/logs/.gitkeep
+storage/instances/*
+!storage/instances/.gitkeep
+storage/gallery/*
+!storage/gallery/.gitkeep
+
+# ── Environment ──
+.env
+
+# ── Template content (never commit VoxelSite ZIPs or extracted versions) ──
+template/voxelsite/*
+!template/voxelsite/.gitkeep
+library/*
+!library/.gitkeep
+
+# ── Build artifacts ──
+*.zip
+.ai
