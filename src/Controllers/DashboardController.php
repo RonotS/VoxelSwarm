@@ -36,6 +36,10 @@ class DashboardController
              LIMIT 10"
         )->fetchAll();
 
+        // Check if at least one template version is prepared
+        $tm = new \Swarm\Services\TemplateManager();
+        $hasTemplates = !empty($tm->listVersions());
+
         Response::view('operator/dashboard', [
             'counts'        => $counts,
             'storageUsed'   => $this->formatBytes($storageUsed),
@@ -44,6 +48,7 @@ class DashboardController
             'baseDomain'    => \Swarm\Models\Setting::get('base_domain', 'localhost'),
             'instancesPath' => $instancesPath,
             'operatorEmail' => \Swarm\Models\Setting::get('operator_email', ''),
+            'hasTemplates'  => $hasTemplates,
         ], 'operator');
     }
 

@@ -29,64 +29,142 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 <body class="bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-zinc-50 min-h-screen flex font-sans selection:bg-orange-500/30 selection:text-white antialiased">
 
   <div class="flex min-h-screen w-full">
+    <!-- Mobile Top Bar (< md) -->
+    <header class="fixed top-0 left-0 right-0 z-40 flex items-center justify-between px-4 bg-white dark:bg-[#0f0f11] border-b border-zinc-200 dark:border-zinc-800/80 md:hidden" style="height: 56px;">
+      <button onclick="toggleSidebar()" id="sidebar-toggle" class="p-2 -ml-1 rounded-lg text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors" aria-label="Toggle navigation">
+        <svg class="w-5 h-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
+      </button>
+      <a href="/operator" class="flex items-center gap-2 text-zinc-900 dark:text-white">
+        <svg viewBox="0 0 24 24" class="text-orange-600" style="width: 20px; height: 20px;" xmlns="http://www.w3.org/2000/svg">
+          <path class="fill-current opacity-100" d="M12 3L20 7.5L12 12L4 7.5Z" />
+          <path class="fill-current opacity-70" d="M4 7.5L12 12L12 21L4 16.5Z" />
+          <path class="fill-current opacity-40" d="M20 7.5L12 12L12 21L20 16.5Z" />
+        </svg>
+        <span class="font-semibold tracking-tight text-sm">VoxelSwarm</span>
+      </a>
+      <div style="width: 36px;"></div>
+    </header>
+
+    <!-- Sidebar Overlay (mobile) -->
+    <div id="sidebar-overlay" class="fixed inset-0 z-30 bg-zinc-950/50 backdrop-blur-sm opacity-0 pointer-events-none md:hidden transition-opacity duration-300" onclick="closeSidebar()"></div>
+
     <!-- Sidebar -->
-    <aside class="w-64 flex-shrink-0 bg-white dark:bg-[#0f0f11] border-r border-zinc-200 dark:border-zinc-800/80 flex flex-col fixed inset-y-0 z-20">
-      <div class="px-6 h-16 flex items-center mb-4">
+    <aside id="sidebar" class="w-64 flex-shrink-0 bg-white dark:bg-[#0f0f11] border-r border-zinc-200 dark:border-zinc-800/80 flex flex-col fixed inset-y-0 z-40 -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+      <!-- Logo -->
+      <div class="px-5 h-16 flex items-center">
         <a href="/operator" class="flex items-center gap-2.5 text-zinc-900 dark:text-white hover:opacity-80 transition-opacity">
-          <svg viewBox="0 0 24 24" class="w-[24px] h-[24px] text-orange-600" xmlns="http://www.w3.org/2000/svg">
+          <svg viewBox="0 0 24 24" class="text-orange-600 flex-shrink-0" style="width: 22px; height: 22px;" xmlns="http://www.w3.org/2000/svg">
             <path class="fill-current opacity-100" d="M12 3L20 7.5L12 12L4 7.5Z" />
             <path class="fill-current opacity-70" d="M4 7.5L12 12L12 21L4 16.5Z" />
             <path class="fill-current opacity-40" d="M20 7.5L12 12L12 21L20 16.5Z" />
           </svg>
-          <span class="font-bold tracking-tight text-[16px]">VoxelSwarm</span>
+          <span class="font-semibold tracking-tight text-sm">VoxelSwarm</span>
         </a>
       </div>
 
-      <nav class="flex-1 px-3 space-y-1">
+      <!-- Navigation -->
+      <nav class="flex-1 px-3 overflow-y-auto">
         <?php
+        /**
+         * Nav item renderer — consistent across all sidebar items.
+         *
+         * Active state: 2px orange left accent + tinted background + orange text.
+         * Hover state: subtle background lift + text brightens.
+         */
         $navItem = function($path, $exact, $icon, $label) use ($currentPath) {
           $isActive = $exact ? $currentPath === $path : str_starts_with($currentPath, $path);
-          $activeClass = $isActive 
-            ? 'bg-zinc-100 dark:bg-zinc-800/50 text-orange-600 dark:text-orange-500 font-medium' 
-            : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium';
+          if ($isActive) {
+            $cls = 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400 font-medium';
+            $style = 'border-left: 2px solid var(--color-orange-500); padding-left: 10px; border-radius: 0 var(--radius-lg) var(--radius-lg) 0;';
+          } else {
+            $cls = 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100 font-medium';
+            $style = 'padding-left: 12px; border-radius: var(--radius-lg);';
+          }
           return sprintf(
-            '<a href="%s" class="flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm %s">%s%s</a>',
-            $path, $activeClass, $icon, $label
+            '<a href="%s" class="group flex items-center gap-3 pr-3 py-2 transition-all duration-150 text-[13px] %s" style="%s">%s<span>%s</span></a>',
+            $path, $cls, $style, $icon, $label
           );
         };
 
-        echo $navItem('/operator', true, '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>', 'Dashboard');
-        echo $navItem('/operator/instances', false, '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 7V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v3"/></svg>', 'Instances');
-        echo $navItem('/operator/templates', false, '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>', 'Templates');
-        echo $navItem('/operator/settings', false, '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>', 'Settings');
+        /**
+         * Section header — uppercase label, generous vertical spacing.
+         */
+        $sectionHeader = function($label) {
+          return '<div class="px-3 pt-6 pb-2 text-[10px] font-semibold uppercase select-none" style="letter-spacing: 0.1em; color: var(--color-zinc-400);">' . $label . '</div>';
+        };
+
+        // ── Main ──
+        echo '<div class="space-y-0.5 mt-1">';
+        // Dashboard — Lucide "layout-dashboard"
+        echo $navItem('/operator', true,
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>',
+          'Dashboard');
+        // Instances — Lucide "layers"
+        echo $navItem('/operator/instances', false,
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>',
+          'Instances');
+        echo '</div>';
+
+        // ── Config ──
+        echo $sectionHeader('Config');
+        echo '<div class="space-y-0.5">';
+        // Templates — Lucide "package"
+        echo $navItem('/operator/templates', false,
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+          'Templates');
+        // Deployment — Lucide "server" (communicates infrastructure/control panel)
+        echo $navItem('/operator/deployment', false,
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="8" x="2" y="2" rx="2" ry="2"/><rect width="20" height="8" x="2" y="14" rx="2" ry="2"/><line x1="6" x2="6.01" y1="6" y2="6"/><line x1="6" x2="6.01" y1="18" y2="18"/></svg>',
+          'Deployment');
+        echo '</div>';
+
+        // ── System ──
+        echo $sectionHeader('System');
+        echo '<div class="space-y-0.5">';
+        // Account — Lucide "user"
+        echo $navItem('/operator/account', false,
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+          'Account');
+        // System — Lucide "settings"
+        echo $navItem('/operator/system', false,
+          '<svg xmlns="http://www.w3.org/2000/svg" class="w-[18px] h-[18px] flex-shrink-0 opacity-70 group-hover:opacity-100 transition-opacity" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>',
+          'System');
+        echo '</div>';
         ?>
       </nav>
 
-      <div class="p-4 border-t border-zinc-200 dark:border-zinc-800/80 space-y-1">
-        <button onclick="toggleTheme()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100 transition-colors">
-          <svg id="theme-icon" class="w-[18px] h-[18px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
-          <span id="theme-label">Light mode</span>
-        </button>
-        
-        <form method="POST" action="/operator/logout" class="w-full m-0">
-          <?= \Swarm\Middleware\Csrf::field() ?>
-          <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-colors">
-            <svg class="w-[18px] h-[18px]" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            Log out
+      <!-- Footer -->
+      <div class="p-3 border-t border-zinc-200 dark:border-zinc-800/80">
+        <div class="space-y-0.5">
+          <button onclick="toggleTheme()" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-zinc-500 dark:text-zinc-400 hover:bg-zinc-100 dark:hover:bg-zinc-800/50 hover:text-zinc-900 dark:hover:text-zinc-100 transition-all duration-150">
+            <svg id="theme-icon" style="width: 16px; height: 16px; flex-shrink: 0; opacity: 0.5;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+            <span id="theme-label">Light mode</span>
           </button>
-        </form>
-        <div class="px-3 pt-2 text-[11px] font-medium text-zinc-400 dark:text-zinc-600">v<?= SWARM_VERSION ?></div>
+          
+          <form method="POST" action="/operator/logout" class="w-full m-0">
+            <?= \Swarm\Middleware\Csrf::field() ?>
+            <button type="submit" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-[13px] font-medium text-zinc-500 dark:text-zinc-400 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400 transition-all duration-150">
+              <svg style="width: 16px; height: 16px; flex-shrink: 0; opacity: 0.5;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              Log out
+            </button>
+          </form>
+        </div>
+        <div class="px-3 pt-2 mt-1">
+          <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-medium text-zinc-400 dark:text-zinc-600 bg-zinc-100 dark:bg-zinc-800">v<?= SWARM_VERSION ?></span>
+        </div>
       </div>
     </aside>
 
+
     <!-- Main content -->
-    <main class="flex-1 ml-64 p-8 md:p-12 max-w-[1200px] relative">
+    <!-- Main content -->
+    <main class="flex-1 md:ml-64 p-6 md:p-12 mt-14 md:mt-0 relative" style="max-width: 1200px;">
       <?= $content ?>
     </main>
   </div>
 
   <!-- Global Toast Container -->
-  <div id="toast-container" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
+  <div id="toast-container" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- Generic Confirmation Modal -->
   <div id="sw-confirm-overlay" class="fixed inset-0 z-[60] hidden items-center justify-center p-4 bg-zinc-950/50 backdrop-blur-sm" style="transition: opacity 0.15s ease;">
@@ -114,28 +192,53 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
     function showToast(message, type = 'success') {
       const container = document.getElementById('toast-container');
       const toast = document.createElement('div');
-      
-      const icons = {
-          success: '<svg class="w-4 h-4 text-green-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
-          error: '<svg class="w-4 h-4 text-red-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
-          info: '<svg class="w-4 h-4 text-blue-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>'
+
+      const config = {
+        success: {
+          icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>',
+          accentColor: '#22c55e',
+          iconBg: 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400'
+        },
+        error: {
+          icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>',
+          accentColor: '#ef4444',
+          iconBg: 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+        },
+        info: {
+          icon: '<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>',
+          accentColor: '#3b82f6',
+          iconBg: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400'
+        }
       };
 
-      toast.className = `transform transition-all duration-300 translate-y-8 opacity-0 flex items-center gap-3 px-4 py-3 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 shadow-[0_4px_12px_rgba(0,0,0,0.05),_0_1px_2px_rgba(0,0,0,0.1)] dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] rounded-xl text-sm font-medium text-zinc-900 dark:text-zinc-100 pointer-events-auto`;
-      toast.innerHTML = `${icons[type] || icons.info} <span>${message}</span>`;
-      
+      const c = config[type] || config.info;
+
+      toast.className = `transform transition-all duration-300 ease-out -translate-y-4 opacity-0 flex items-center gap-3.5 pl-5 pr-3 py-4 min-w-[320px] max-w-md bg-white dark:bg-zinc-800 border border-zinc-200 dark:border-zinc-700 rounded-xl text-[13.5px] font-medium text-zinc-800 dark:text-zinc-100 pointer-events-auto`;
+      toast.style.borderLeftWidth = '3px';
+      toast.style.borderLeftColor = c.accentColor;
+      toast.style.boxShadow = document.documentElement.classList.contains('dark')
+        ? '0 8px 30px rgba(0,0,0,0.35), 0 2px 8px rgba(0,0,0,0.25), 0 0 1px rgba(0,0,0,0.4)'
+        : '0 8px 30px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.1)';
+
+      toast.innerHTML = `<div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${c.iconBg}">${c.icon}</div><span class="flex-1">${message}</span><button class="ml-2 p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-200 hover:bg-zinc-100 dark:hover:bg-zinc-700 transition-colors flex-shrink-0" aria-label="Close"><svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>`;
+
+      // Close button handler
+      const closeBtn = toast.querySelector('button');
+      const dismiss = () => {
+        toast.classList.add('-translate-y-4', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      };
+      closeBtn.addEventListener('click', dismiss);
+
       container.appendChild(toast);
-      
+
       // Animate in
       requestAnimationFrame(() => {
-        toast.classList.remove('translate-y-8', 'opacity-0');
+        toast.classList.remove('-translate-y-4', 'opacity-0');
       });
 
-      // Animate out
-      setTimeout(() => {
-        toast.classList.add('translate-y-8', 'opacity-0');
-        setTimeout(() => toast.remove(), 300);
-      }, 4000);
+      // Auto-dismiss after 6 seconds
+      setTimeout(dismiss, 6000);
     }
 
     function toggleTheme() {
@@ -246,6 +349,35 @@ $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         document.addEventListener('keydown', onKey);
       });
     }
+
+    /* ── Mobile Sidebar Toggle ─────────────────────── */
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.contains('-translate-x-full') ? openSidebar() : closeSidebar();
+    }
+
+    function openSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.remove('-translate-x-full');
+      overlay.classList.remove('opacity-0', 'pointer-events-none');
+      overlay.classList.add('opacity-100', 'pointer-events-auto');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebar-overlay');
+      sidebar.classList.add('-translate-x-full');
+      overlay.classList.remove('opacity-100', 'pointer-events-auto');
+      overlay.classList.add('opacity-0', 'pointer-events-none');
+      document.body.style.overflow = '';
+    }
+
+    // Auto-close sidebar when resizing to desktop
+    window.addEventListener('resize', function() {
+      if (window.innerWidth >= 768) closeSidebar();
+    });
   </script>
 </body>
 </html>
