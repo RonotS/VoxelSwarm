@@ -5,12 +5,12 @@
 $pageTitle = 'Instances — VoxelSwarm';
 ?>
 
-<div class="mb-8 flex items-center justify-between">
+<div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
   <div>
     <h1 class="text-2xl font-bold tracking-tight text-zinc-900 dark:text-white">Instances</h1>
-    <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Manage your provisioned VoxelSite workspaces.</p>
+    <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Every VoxelSite deployment managed by this cluster.</p>
   </div>
-  <button onclick="openNewInstanceModal()" class="sw-btn-primary">
+  <button onclick="<?= $hasTemplates ? 'openNewInstanceModal()' : 'noTemplatesAlert()' ?>" class="sw-btn-primary">
     <svg class="w-4 h-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     New Instance
   </button>
@@ -48,8 +48,17 @@ $pageTitle = 'Instances — VoxelSwarm';
 <!-- Table -->
 <div class="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800/80 rounded-xl shadow-sm dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] overflow-hidden">
   <?php if (empty($instances)): ?>
-    <div class="p-12 text-center text-sm text-zinc-500 dark:text-zinc-400">
-      No instances found matching your criteria.
+    <div class="p-8 text-center">
+      <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-zinc-100 dark:bg-zinc-800 flex items-center justify-center">
+        <svg class="w-6 h-6 text-zinc-400 dark:text-zinc-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></svg>
+      </div>
+      <?php if (!empty($filters['search']) || !empty($filters['status'])): ?>
+        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">No matches</p>
+        <p class="text-xs text-zinc-400 dark:text-zinc-500">Try a different search term or clear the filters.</p>
+      <?php else: ?>
+        <p class="text-sm font-medium text-zinc-700 dark:text-zinc-300 mb-1">No instances yet</p>
+        <p class="text-xs text-zinc-400 dark:text-zinc-500">Create your first instance to deploy a VoxelSite website.</p>
+      <?php endif; ?>
     </div>
   <?php else: ?>
     <div class="overflow-x-auto">
@@ -106,4 +115,19 @@ $pageTitle = 'Instances — VoxelSwarm';
   <?php endif; ?>
 </div>
 
-<?php require __DIR__ . '/partials/new-instance-modal.php'; ?>
+<?php if ($hasTemplates): ?>
+  <?php require __DIR__ . '/partials/new-instance-modal.php'; ?>
+<?php endif; ?>
+
+<script>
+function noTemplatesAlert() {
+  swConfirm({
+    title: 'No template available',
+    message: 'You need to process at least one VoxelSite template before creating instances. Go to Templates to upload and process a VoxelSite ZIP file.',
+    confirmLabel: 'Go to Templates',
+    danger: false
+  }).then(() => {
+    location.href = '/operator/templates';
+  }).catch(() => {});
+}
+</script>

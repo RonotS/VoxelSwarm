@@ -31,6 +31,10 @@ class InstanceController
 
         $instances = Instance::list($filters);
 
+        // Check if at least one template version is prepared
+        $tm = new \Swarm\Services\TemplateManager();
+        $hasTemplates = !empty($tm->listVersions());
+
         Response::view('operator/instances', [
             'instances'     => $instances,
             'filters'       => $filters,
@@ -39,6 +43,7 @@ class InstanceController
             'baseDomain'    => Setting::get('base_domain', 'localhost'),
             'instancesPath' => Setting::get('instances_path', SWARM_STORAGE . '/instances'),
             'operatorEmail' => Setting::get('operator_email', ''),
+            'hasTemplates'  => $hasTemplates,
         ], 'operator');
     }
 
@@ -48,6 +53,13 @@ class InstanceController
     public function store(): void
     {
         Csrf::validate();
+
+        // Guard: require at least one processed template
+        $tm = new \Swarm\Services\TemplateManager();
+        if (empty($tm->listVersions())) {
+            \Swarm\Logger::warning('swarm', 'Instance creation blocked: no templates processed');
+            Response::json(['error' => 'No VoxelSite template is prepared yet. Process a template first at Templates → Process.'], 422);
+        }
 
         // Slug can be provided directly, or generated from name
         $slug  = !empty($_POST['slug']) ? trim($_POST['slug']) : '';
