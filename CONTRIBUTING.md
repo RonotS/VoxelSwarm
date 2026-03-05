@@ -38,7 +38,7 @@ Quick overview:
 
 ### Code Style
 
-- **PHP 8.1+** features are welcome (match expressions, named arguments, readonly properties)
+- **PHP 8.2+** features are welcome (match expressions, named arguments, readonly properties, enums)
 - No frameworks — keep it plain PHP
 - Follow the existing code patterns in `src/`
 - Use `declare(strict_types=1)` in all PHP files

@@ -53,17 +53,17 @@ This extracts VoxelSite, moves the image library to a shared location (saving ~1
 
 ### 4. Provision instances
 
-By default, VoxelSwarm runs in **operator-only mode** — `GET /` redirects to the operator login. You provision instances from the dashboard at `/operator`. When you're ready for public self-service signups, enable the public site in Settings.
+By default, VoxelSwarm runs in **operator-only mode** — `GET /` redirects to the operator login. You provision instances from the dashboard at `/operator`. When you're ready for public self-service signups, enable the public site in Deployment settings.
 
 ---
 
 ## Requirements
 
-- **PHP 8.1+** with extensions: `pdo_sqlite`, `mbstring`, `openssl`, `fileinfo`, `zip`, `curl`
+- **PHP 8.2+** with extensions: `pdo_sqlite`, `mbstring`, `openssl`, `fileinfo`, `zip`, `curl`
 - **Web server:** Nginx (recommended) or Apache with `mod_rewrite`
-- **Wildcard DNS:** `*.yourdomain.com → your server IP`
-- **Wildcard SSL:** for `*.yourdomain.com` (Nginx adapter) or handled by your control panel
-- **VoxelSite license:** [Regular](https://voxelsite.com/buy) for testing, [Extended](https://voxelsite.com/buy) for production multi-site
+- **Wildcard DNS:** `*.yourdomain.com → your server IP` (only for Nginx adapter — Forge, cPanel, and Plesk handle this automatically)
+- **Wildcard SSL:** for `*.yourdomain.com` (only for Nginx adapter — other adapters provision SSL per-subdomain)
+- **VoxelSite license:** [voxelsite.com/buy](https://voxelsite.com/buy)
 - No MySQL. No Node.js. No Redis. No Composer required — `vendor/` is included in the repo.
 
 ---
@@ -137,9 +137,7 @@ VoxelSwarm/
 
 VoxelSwarm itself is **free and open source** (MIT License).
 
-VoxelSite is a commercial product sold on [CodeCanyon](https://voxelsite.com/buy). A **regular license** is all you need to test VoxelSwarm. For production multi-site use, an **extended license** is required per VPS/server.
-
-> **Start with the regular license.** Get VoxelSwarm running on your setup first. Report issues. Help us stabilize it. Early testers are granted extended license use.
+To deploy instances, you need a VoxelSite license — [voxelsite.com/buy](https://voxelsite.com/buy).
 
 ---
 

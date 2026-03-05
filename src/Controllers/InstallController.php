@@ -49,10 +49,10 @@ class InstallController
 
         // PHP version
         $phpVersion = PHP_VERSION;
-        $phpOk = version_compare($phpVersion, '8.1.0', '>=');
+        $phpOk = version_compare($phpVersion, '8.2.0', '>=');
         $checks[] = [
-            'name'     => 'PHP ≥ 8.1',
-            'detail'   => "PHP {$phpVersion}" . ($phpOk ? '' : ' (requires 8.1+)'),
+            'name'     => 'PHP ≥ 8.2',
+            'detail'   => "PHP {$phpVersion}" . ($phpOk ? '' : ' (requires 8.2+)'),
             'status'   => $phpOk ? 'pass' : 'fail',
             'required' => true,
         ];
