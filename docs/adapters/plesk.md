@@ -8,8 +8,7 @@ The Plesk adapter uses the [Plesk REST API](https://docs.plesk.com/en-US/obsidia
 
 - **createSubdomain:** Creates a subdomain under the operator's Plesk subscription via REST API
 - **removeSubdomain:** Removes the subdomain via REST API
-- **pauseSubdomain:** Sets the subdomain to maintenance mode via Plesk API
-- **resumeSubdomain:** Removes maintenance mode
+- **pauseSubdomain / resumeSubdomain:** Currently log warnings only. The adapter does not yet toggle maintenance mode remotely.
 
 SSL is handled via Plesk's built-in Let's Encrypt integration.
 
@@ -23,9 +22,8 @@ SSL is handled via Plesk's built-in Let's Encrypt integration.
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `plesk_hostname` | Plesk server hostname | `server.yourdomain.com` |
-| `plesk_port` | Plesk port (usually 8443) | `8443` |
-| `plesk_api_key` | Plesk API key | `your-api-key-here` |
+| `hostname` | Plesk base URL, including the port if required | `https://server.yourdomain.com:8443` |
+| `api_key` | Plesk API key | `your-api-key-here` |
 
 ### Getting a Plesk API Key
 

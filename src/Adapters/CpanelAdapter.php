@@ -64,7 +64,18 @@ class CpanelAdapter implements ControlPanelAdapter
     private function whmRequest(string $function, array $params = []): array
     {
         $query = http_build_query($params);
-        $url   = "{$this->hostname}:2087/json-api/{$function}?{$query}";
+        $base  = $this->hostname;
+
+        if (!preg_match('#^https?://#i', $base)) {
+            $base = 'https://' . $base;
+        }
+
+        $port = parse_url($base, PHP_URL_PORT);
+        if ($port === null) {
+            $base .= ':2087';
+        }
+
+        $url = "{$base}/json-api/{$function}?{$query}";
 
         $context = stream_context_create([
             'http' => [

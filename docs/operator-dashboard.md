@@ -2,6 +2,8 @@
 
 The operator dashboard is your control center for managing VoxelSwarm. Access it at `https://yourdomain.com/operator`.
 
+For the full route inventory, visibility rules, and public-page map, see [page-map.md](page-map.md).
+
 ## Authentication
 
 Single operator password, set during installation. Session lasts 30 days. Rate limited to 5 login attempts per IP per 15 minutes.
@@ -34,9 +36,11 @@ Filterable table showing all instances:
 
 - **Header:** Instance name, status badge with colored dot, slug in monospace
 - **Details card:** Structured list of icon-led rows (identifier, URL, email, type, created, provisioned)
-- **Actions:** Icon buttons for Pause/Resume & Delete (with confirmation dialog)
-- **Provision Log:** Card-wrapped timeline of provisioning steps
+- **Actions:** Pause when active, Resume when paused, Delete with confirmation
+- **Provision Log:** Card-wrapped deployment history table
 - **Notes:** Private operator notes with toast notification on save
+
+Adapter caveat: the UI exposes Pause/Resume broadly, but adapter support varies. Nginx rewrites the conf into a maintenance response, the local adapter only logs the action, and Forge/cPanel/Plesk currently warn rather than fully toggling availability.
 
 ### Instance Lifecycle
 
@@ -56,7 +60,7 @@ The modal adapts to the configured adapter:
 - **Domain adapters** (Nginx, Forge, cPanel, Plesk): Shows a subdomain input with `.basedomain.com` suffix and live preview
 - **Filesystem adapter**: Shows the instances root path prefix with a folder name input
 
-To promote an instance to the public gallery: open instance detail → "Mark as Gallery Demo".
+Implementation note: the controller has a gallery-marking endpoint, but the current operator UI does not expose a "Mark as Gallery Demo" action.
 
 ## Template Management (`/operator/templates`)
 
@@ -86,7 +90,7 @@ Upload ZIPs to the server via FTP/SSH, then process them from this page.
 
 | Section | What you configure |
 |---------|-------------------|
-| **Adapter** | Control panel adapter + adapter-specific config. Icon-led labels for cognitive unloading. "Test Connection" tests the currently visible form values, not saved settings. |
+| **Adapter** | Control panel adapter + adapter-specific config. "Test Connection" tests the currently visible form values, not just the saved ones. |
 | **Public Site** | Landing page toggle + signups toggle |
 | **Notifications** | Email driver (SMTP / Log / Disabled) + SMTP config + "Send Test Email" |
 
@@ -101,9 +105,10 @@ Upload ZIPs to the server via FTP/SSH, then process them from this page.
 
 | Section | What you see |
 |---------|-------------------|
-| **System Status** | PHP version, SQLite version, database size, storage path |
-| **Update** | Current version + update instructions |
-| **Danger Zone** | Refresh Installation (purge instances), Reset Installation (full wipe) |
+| **System Status** | VoxelSwarm version, PHP version, SQLite version, database size |
+| **Update** | Git availability, `Pull Latest`, and raw pull output |
+| **Server Logs** | Download and delete `.log` files from `storage/logs/` |
+| **Danger Zone** | Refresh Installation (purge instances but keep account/settings), Reset Installation (full wipe) |
 
 ## Logs
 
@@ -116,4 +121,4 @@ Logs are stored in `storage/logs/` with daily rotation:
 | `swarm-YYYY-MM-DD.log` | Settings changes, operator actions |
 | `mail-YYYY-MM-DD.log` | Email sends and failures |
 
-Old logs can be deleted manually. There is no automated retention or cleanup.
+The System page can download or delete `.log` files. Retention is still manual or external to the app.

@@ -1,62 +1,83 @@
 # Configuration
 
-VoxelSwarm stores all configuration in the SQLite database (`storage/swarm.db`) via the `settings` table. The install wizard populates these during setup. You can change them anytime from the operator dashboard at `/operator/settings`.
+VoxelSwarm stores runtime configuration in the SQLite `settings` table inside `storage/swarm.db`. The web install wizard creates the first values, then the operator updates them from the dashboard.
+
+The active settings UI is split across:
+
+- `/operator/deployment` for infrastructure, public-site, and mail settings
+- `/operator/account` for operator email and password
+
+`/operator/settings` is now only a legacy redirect to `/operator/deployment`.
+
+For a route-by-route map of where each setting is used, see [page-map.md](page-map.md).
 
 ## Settings Reference
 
-### General
+### Operator-Editable Settings
 
-| Setting | Description | Default |
-|---------|-------------|---------|
-| `base_domain` | Your Swarm domain (e.g. `voxelsite.io`) | Set during install |
-| `instances_path` | Where instances are stored | `storage/instances` |
-| `template_path` | Path to prepared VoxelSite template | `template/voxelsite` |
-| `max_instances` | Maximum number of instances allowed | `100` |
-| `signups_enabled` | Whether the public signup form is active | `true` |
-| `gallery_enabled` | Whether the public gallery is visible | `true` |
-| `operator_email` | Email for provisioning failure notifications | Set during install |
+| Setting | Edited In | Description | Install Default |
+|---------|-----------|-------------|-----------------|
+| `base_domain` | `/operator/deployment` | Base domain used for instance subdomains and public links | Value entered during install |
+| `max_instances` | `/operator/deployment` | Maximum total instances allowed for public signup flow | `100` |
+| `public_site_enabled` | `/operator/deployment` | Whether `/` renders the landing page instead of redirecting to operator login | `false` |
+| `signups_enabled` | `/operator/deployment` | Whether the public signup form is active | `false` |
+| `control_panel_adapter` | `/operator/deployment` | Active adapter: `local`, `nginx`, `forge`, `cpanel`, `plesk` | Adapter chosen during install |
+| `adapter_config` | `/operator/deployment` | JSON payload for adapter-specific config | Empty or install input |
+| `mail_driver` | `/operator/deployment` | `smtp`, `log`, or `null` | `log` unless changed during install |
+| `mail_config` | `/operator/deployment` | JSON payload for SMTP settings | Empty unless SMTP was configured |
+| `operator_email` | `/operator/account` | Address used for failure notifications and test mail | Value entered during install |
+| `operator_password_hash` | `/operator/account` | bcrypt hash used for operator login | Generated during install |
 
-### Control Panel
-
-| Setting | Description |
-|---------|-------------|
-| `control_panel_adapter` | Active adapter: `local`, `nginx`, `forge`, `cpanel`, `plesk` |
-| `adapter_config` | JSON object with adapter-specific credentials (encrypted) |
-
-See [adapters/README.md](adapters/README.md) for adapter-specific configuration.
-
-### Email
+### System-Managed Settings
 
 | Setting | Description |
 |---------|-------------|
-| `mail_driver` | `smtp`, `log`, or `null` |
-| `mail_config` | JSON with SMTP host, port, username, password (encrypted), encryption |
+| `instances_path` | Root directory where provisioned instances are stored. Created during install and updated when the local adapter is verified with a custom root. |
+| `template_path` | Path used by the provisioner when copying the active VoxelSite template. Defaults to `template/voxelsite/active`. |
+| `app_key` | AES-256-CBC encryption key for sensitive stored values. Generated once during install. |
+| `version` | Installed VoxelSwarm version. |
+| `installed_at` | ISO-8601 install timestamp. |
 
-When `mail_driver` is `log`, emails are written to `storage/logs/mail-YYYY-MM-DD.log` instead of being sent. Useful for testing.
-
-### Security
+### Code-Backed But Not Currently Exposed In The Dashboard
 
 | Setting | Description |
 |---------|-------------|
-| `app_key` | 32-byte hex key for AES-256-CBC encryption. Generated during install. **Do not change this** after adapter credentials are stored — they'll become unreadable. |
-| `operator_password_hash` | bcrypt hash of the operator password |
+| `gallery_enabled` | Enables the public `/gallery` page. The current operator UI does not expose a toggle for this. |
+
+## Control Panel Settings
+
+`control_panel_adapter` and `adapter_config` are stored separately:
+
+- `control_panel_adapter` chooses the adapter class
+- `adapter_config` stores the adapter's fields as JSON
+
+See [adapters/README.md](adapters/README.md) for the current field names used by each adapter.
+
+## Email Settings
+
+When `mail_driver` is `log`, VoxelSwarm writes mail activity to `storage/logs/mail-YYYY-MM-DD.log` instead of sending it.
+
+When `mail_driver` is `null`, welcome emails, failure notifications, and test mail are skipped entirely.
 
 ## Environment File
 
-VoxelSwarm uses a minimal `.env` file for bootstrap-level configuration only:
+VoxelSwarm keeps `.env` intentionally small:
 
 ```env
 APP_DEBUG=false
 APP_URL=https://yourdomain.com
 ```
 
-All other configuration lives in the database. This is intentional — it means settings can be changed from the dashboard without SSH access.
+Everything else lives in the database so the operator can manage it from the dashboard.
 
 ## Changing Settings
 
 ### Via Dashboard
 
-Visit `/operator/settings`. Changes take effect immediately.
+- Visit `/operator/deployment` for deployment, public-site, and mail settings.
+- Visit `/operator/account` for operator email and password.
+
+Changes take effect immediately.
 
 ### Via CLI
 
@@ -70,6 +91,10 @@ echo 'Done.';
 
 ## Sensitive Data
 
-Adapter credentials (API tokens, passwords) and SMTP passwords are encrypted at rest using AES-256-CBC with the `app_key`. They are decrypted only in memory during use and never logged.
+Adapter credentials and SMTP secrets are encrypted at rest with `app_key` by `Setting::setJson()`.
 
-The Settings view never displays decrypted values — it shows masked inputs with a "Change" button to update.
+Implementation detail:
+
+- Adapter credentials are decrypted when the Deployment page renders, then shown in password-style inputs.
+- The SMTP password field is not re-populated on the Deployment page, so re-enter it only when you want to change it.
+- Secrets are not written to the log files.

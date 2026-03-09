@@ -21,7 +21,7 @@ The most impactful contribution you can make. See [docs/adapters/writing-an-adap
 Quick overview:
 1. Create `src/Adapters/YourPanelAdapter.php` implementing the `ControlPanelAdapter` interface
 2. Register it in `AdapterFactory.php`
-3. Add config fields to the settings view
+3. Add config fields to the deployment view
 4. Write documentation in `docs/adapters/yourpanel.md`
 5. Submit a PR
 
@@ -76,4 +76,4 @@ Use [Laravel Herd](https://herd.laravel.com/) or [Laravel Valet](https://laravel
 
 ## Questions?
 
-Open a [discussion](https://github.com/NowSquare/VoxelSwarm/discussions) or [issue](https://github.com/NowSquare/VoxelSwarm/issues). We're here to help.
+Open an [issue](https://github.com/NowSquare/VoxelSwarm/issues) for questions or issues.

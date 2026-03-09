@@ -42,7 +42,7 @@ The provisioner calls these methods during the instance lifecycle. It never know
 
 ## Configuring an Adapter
 
-Via the operator dashboard (`/operator/settings` → Control Panel section):
+Via the operator dashboard (`/operator/deployment` → Adapter section):
 
 1. Select your adapter from the dropdown
 2. Fill in adapter-specific fields (shown dynamically)
@@ -55,7 +55,7 @@ Or during installation via `php scripts/install.php`.
 
 After configuring:
 
-1. Use "Test Connection" in Settings to verify connectivity
+1. Use "Test Connection" in Deployment to verify connectivity
 2. Provision a demo instance from the dashboard
 3. Check `storage/logs/adapter-YYYY-MM-DD.log` for detailed API interactions
 4. Verify the instance is accessible via its subdomain

@@ -8,8 +8,7 @@ The Forge adapter uses the [Laravel Forge API](https://forge.laravel.com/api-doc
 
 - **createSubdomain:** Creates a new site via Forge API with the subdomain and document root
 - **removeSubdomain:** Deletes the site via Forge API
-- **pauseSubdomain:** Toggles site active state via Forge API
-- **resumeSubdomain:** Re-enables the site via Forge API
+- **pauseSubdomain / resumeSubdomain:** Currently log warnings only. The operator UI still shows the buttons, but the Forge adapter does not yet toggle site availability.
 
 SSL is handled automatically by Forge via Let's Encrypt.
 
@@ -24,8 +23,8 @@ SSL is handled automatically by Forge via Let's Encrypt.
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `forge_token` | Forge API bearer token | `eyJ0eXAi...` |
-| `forge_server_id` | Forge server ID (visible in Forge dashboard URL) | `123456` |
+| `api_token` | Forge API bearer token | `eyJ0eXAi...` |
+| `server_id` | Forge server ID (visible in Forge dashboard URL) | `123456` |
 
 ### Getting Your Forge API Token
 

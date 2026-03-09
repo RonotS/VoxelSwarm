@@ -142,17 +142,19 @@ return match ($adapter) {
 };
 ```
 
-### 3. Add Settings UI Fields
+### 3. Add Deployment UI Fields
 
-In `views/operator/settings.php`, add a config section that shows when your adapter is selected:
+Add your fields to `views/operator/deployment.php` and expose the adapter in the same page's select list. Match the existing `adapter-fields` pattern so `onAdapterChange()` can reveal the correct panel:
 
 ```html
-<div x-show="adapter === 'yourpanel'" x-cloak>
-    <label>Hostname</label>
-    <input type="text" name="adapter_config[hostname]" />
-    
-    <label>API Key</label>
-    <input type="password" name="adapter_config[api_key]" />
+<div id="adapter-yourpanel" class="adapter-fields hidden">
+    <div class="bg-zinc-50 dark:bg-zinc-950 p-5 rounded-xl border border-zinc-200 dark:border-zinc-800/50">
+        <label>Hostname</label>
+        <input type="text" name="adapter_config[hostname]" />
+
+        <label>API Key</label>
+        <input type="password" name="adapter_config[api_key]" />
+    </div>
 </div>
 ```
 

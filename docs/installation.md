@@ -97,11 +97,14 @@ See [Template Preparation](template-preparation.md) for details.
 
 ## Step 5: Provision Your First Instance
 
-1. Visit `/operator` and log in
-2. Click "New Demo Instance" on the dashboard
-3. Enter a test name
-4. Watch the provisioning progress
-5. Visit the resulting instance URL
+1. Open `/operator`
+2. Click `New Instance`
+3. Enter an identifier
+4. Optionally add a display name and contact email
+5. Open the resulting instance detail page and watch the provision log
+6. Visit the resulting instance URL once it is active
+
+If you want public self-service signups later, enable `Show landing page` and `Accept signups` in `/operator/deployment`. By default, `/` redirects straight to `/operator/login`.
 
 ## Next Steps
 
@@ -120,4 +123,4 @@ npm install
 npm run dev    # Vite watch mode for Tailwind + Alpine.js
 ```
 
-This is **not required** for running VoxelSwarm. The `build/` directory already contains pre-compiled CSS and JS. Only run this if you're contributing to VoxelSwarm's UI or developing adapter settings views.
+This is **not required** for running VoxelSwarm. The `build/` directory already contains pre-compiled CSS and JS. Only run this if you're contributing to VoxelSwarm's UI or developing the deployment/adapter interface.

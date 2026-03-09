@@ -36,10 +36,12 @@ certbot certonly --dns-cloudflare \
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `nginx_conf_dir` | Path to Nginx conf.d directory | `/etc/nginx/conf.d` |
-| `reload_command` | Command to reload Nginx | `sudo systemctl reload nginx` |
+| `conf_dir` | Path to the writable Nginx config directory | `/etc/nginx/conf.d` |
+| `reload_cmd` | Command used after config changes | `nginx -t && systemctl reload nginx` |
 | `ssl_cert_path` | Path to SSL fullchain | `/etc/letsencrypt/live/yourdomain.com/fullchain.pem` |
 | `ssl_key_path` | Path to SSL private key | `/etc/letsencrypt/live/yourdomain.com/privkey.pem` |
+
+`base_domain` is configured separately on the Deployment page.
 
 ## Permissions
 
@@ -54,7 +56,7 @@ echo "www-data ALL=(ALL) NOPASSWD: /usr/bin/systemctl reload nginx" | sudo tee /
 
 ## Troubleshooting
 
-- **"Permission denied" on conf write:** Check ownership of `nginx_conf_dir`
+- **"Permission denied" on conf write:** Check ownership of `conf_dir`
 - **"nginx: [emerg] could not build server...":** The generated conf has an error — check `storage/logs/adapter-YYYY-MM-DD.log`
 - **Subdomain not resolving:** Verify wildcard DNS with `dig test.yourdomain.com`
 - **SSL errors:** Verify certificate covers `*.yourdomain.com`

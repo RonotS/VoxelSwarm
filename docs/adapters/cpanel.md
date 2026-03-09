@@ -8,10 +8,9 @@ The cPanel adapter uses the [WHM API](https://api.docs.cpanel.net/) to create su
 
 - **createSubdomain:** Creates a subdomain under a cPanel account via WHM API and sets the document root
 - **removeSubdomain:** Removes the subdomain via WHM API
-- **pauseSubdomain:** Replaces the document root with a holding page directory
-- **resumeSubdomain:** Restores the original document root
+- **pauseSubdomain / resumeSubdomain:** Currently log warnings only. The adapter does not yet switch the site into a maintenance page.
 
-SSL is handled via cPanel's AutoSSL, triggered after subdomain creation.
+SSL handling depends on your cPanel setup. VoxelSwarm does not trigger AutoSSL directly in the current adapter.
 
 ## Prerequisites
 
@@ -26,11 +25,8 @@ SSL is handled via cPanel's AutoSSL, triggered after subdomain creation.
 
 | Field | Description | Example |
 |-------|-------------|---------|
-| `whm_hostname` | WHM server hostname | `server.yourdomain.com` |
-| `whm_port` | WHM port (usually 2087) | `2087` |
-| `whm_token` | WHM API token | `ABCDEF123456...` |
-| `whm_username` | WHM username | `root` |
-| `cpanel_account` | cPanel account to create subdomains under | `voxelsite` |
+| `hostname` | WHM base URL. `https://server.example.com` and `https://server.example.com:2087` are both accepted. | `https://server.example.com:2087` |
+| `api_token` | WHM API token | `ABCDEF123456...` |
 
 ### Getting a WHM API Token
 
