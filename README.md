@@ -159,7 +159,7 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 ## Support
 
 - **Check the logs:** `storage/logs/` contains detailed, structured logs for every provisioning step, adapter call, email, and operator action. See [Testing & Feedback](docs/testing-feedback.md) and [Troubleshooting → Log Files](docs/troubleshooting.md#log-files).
-- **Report a bug:** Start with [docs/testing-feedback.md](docs/testing-feedback.md), then open an issue at [github.com/NowSquare/VoxelSwarm/issues](https://github.com/NowSquare/VoxelSwarm/issues).
+- **Report a bug:** Start with [docs/testing-feedback.md](docs/testing-feedback.md), then open an issue at [github.com/NowSquare/VoxelSwarm/issues](https://github.com/NowSquare/VoxelSwarm/issues). If you are a VoxelSite customer and prefer not to share logs publicly, you can also use [VoxelSite support](https://codecanyon.net/item/voxelsite-ai-website-generator-selfhosted-own-your-files/62090509/support).
 - **VoxelSite:** [voxelsite.com](https://voxelsite.com) — for VoxelSite-specific issues (the AI builder, not VoxelSwarm)
 - **Multi-Site:** [voxelsite.com/multi-site](https://voxelsite.com/multi-site)
 

@@ -201,11 +201,19 @@ The logs should not contain passwords or API tokens, but you should still review
 
 If a report includes sensitive operational details, mention that in the issue and share only the minimum needed publicly.
 
+If you are a VoxelSite customer and would rather not post logs in a public GitHub issue, you can send them more privately through VoxelSite support:
+
+[VoxelSite support](https://codecanyon.net/item/voxelsite-ai-website-generator-selfhosted-own-your-files/62090509/support)
+
 ## Where To Report
 
 Open an issue on GitHub:
 
 [github.com/NowSquare/VoxelSwarm/issues](https://github.com/NowSquare/VoxelSwarm/issues)
+
+Alternative:
+
+- If you are a VoxelSite customer and prefer not to share logs in public, use [VoxelSite support](https://codecanyon.net/item/voxelsite-ai-website-generator-selfhosted-own-your-files/62090509/support).
 
 If the issue turns out to be inside VoxelSite itself rather than VoxelSwarm's provisioning/deployment layer, use VoxelSite support instead.
 
