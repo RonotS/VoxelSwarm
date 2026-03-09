@@ -48,3 +48,5 @@ If you're running cPanel, please test VoxelSwarm and [report any issues](https:/
 - Your cPanel version
 - Hosting type (dedicated, VPS, shared, reseller)
 - Any error messages from `storage/logs/adapter-YYYY-MM-DD.log`
+
+See [../testing-feedback.md](../testing-feedback.md) for the full reporting checklist and the reasoning behind the logging model.

@@ -2,6 +2,8 @@
 
 Thank you for considering contributing to VoxelSwarm. Every hosting environment is different — your testing, bug reports, and adapter contributions make VoxelSwarm better for everyone.
 
+If you are testing VoxelSwarm on a real environment, read [docs/testing-feedback.md](docs/testing-feedback.md) first. It explains the early-access model, the logging strategy, and what to include when reporting failures.
+
 ## How to Contribute
 
 ### Reporting Bugs
@@ -72,7 +74,7 @@ npm run dev          # Vite watch mode for Tailwind + Alpine.js
 
 > Note: `npm install` and `npm run dev` are **not required** for running VoxelSwarm. The `build/` directory already contains pre-compiled CSS and JS. Only use this if you're modifying the UI.
 
-Use [Laravel Herd](https://herd.laravel.com/) or [Laravel Valet](https://laravel.com/docs/valet) for local development with the `local` adapter.
+Use [Laravel Herd](https://herd.laravel.com/) or [Laravel Valet](https://laravel.com/docs/valet) for macOS local development with the `local` adapter. Both can serve plain PHP projects; Laravel is not required.
 
 ## Questions?
 

@@ -1,124 +1,495 @@
 # Operator Dashboard
 
-The operator dashboard is your control center for managing VoxelSwarm. Access it at `https://yourdomain.com/operator`.
+This guide explains the operator-facing UI page by page, including the important empty states and behavior changes that depend on your settings.
 
-For the full route inventory, visibility rules, and public-page map, see [page-map.md](page-map.md).
+For the full route inventory and visibility conditions, see [page-map.md](page-map.md).
 
-## Authentication
+## Authentication And Layout
 
-Single operator password, set during installation. Session lasts 30 days. Rate limited to 5 login attempts per IP per 15 minutes.
+- Operator pages live under `/operator/*`.
+- Authentication is a single operator password set during installation.
+- Sessions last 30 days.
+- Login is rate-limited to 5 attempts per IP per 15 minutes.
+- The shared operator layout includes:
+  - Sidebar navigation: `Dashboard`, `Instances`, `Templates`, `Deployment`, `Account`, `System`
+  - Mobile top bar and slide-in sidebar
+  - Theme toggle
+  - Logout button
+  - Version badge in the sidebar footer
 
-To change the password, visit `/operator/account`.
+## Dashboard (`/operator`)
 
-## Dashboard Overview
+The dashboard has two distinct states.
 
-The main dashboard has two modes:
+### Onboarding State
 
-**Onboarding** (first visit): A guided 3-step setup — Prepare a template, Configure deployment, Create your first instance.
+Visible when there are no instances yet.
 
-**Active** (instances exist):
-- **Summary cards:** Total instances, Active, Paused, Storage used
-- **Recent activity:** Last 10 provisioning events
-- **Quick action:** "New Instance" button
+What you see:
 
-Sidebar navigation groups: Dashboard + Instances, Templates + Deployment (CONFIG), Account + System (SYSTEM). Mobile-responsive with slide-in sidebar and backdrop overlay.
+- A centered welcome screen
+- A 3-step onboarding checklist:
+  - `Prepare a template`
+  - `Configure deployment`
+  - `Create your first instance`
 
-## Instance Management
+Behavior details:
 
-### Instance List (`/operator/instances`)
+- The template step is marked complete only when at least one prepared template version exists.
+- Deployment completion is not auto-detected. The dashboard keeps showing deployment as the next recommended step even after you save Deployment settings.
+- The dashboard does not show stats or recent activity in onboarding mode.
+- If you already have a template and want to create the first instance, go to `/operator/instances` and use `New Instance`.
 
-Filterable table showing all instances:
-- Identifier, name, email, status badge, type badge, created date
-- **Filters:** Status (all/active/paused/provisioning/failed), Search by name or email
-- **Per-row actions:** Click row to view detail page
+### Active Dashboard State
 
-### Instance Detail (`/operator/instances/{id}`)
+Visible once at least one instance exists.
 
-- **Header:** Instance name, status badge with colored dot, slug in monospace
-- **Details card:** Structured list of icon-led rows (identifier, URL, email, type, created, provisioned)
-- **Actions:** Pause when active, Resume when paused, Delete with confirmation
-- **Provision Log:** Card-wrapped deployment history table
-- **Notes:** Private operator notes with toast notification on save
+What you see:
 
-Adapter caveat: the UI exposes Pause/Resume broadly, but adapter support varies. Nginx rewrites the conf into a maintenance response, the local adapter only logs the action, and Forge/cPanel/Plesk currently warn rather than fully toggling availability.
+- Summary cards:
+  - `Total Instances`
+  - `Active`
+  - `Paused`
+  - `Storage Used`
+- `Recent Activity` table showing the last 10 provisioning log rows
+- `New Instance` button
 
-### Instance Lifecycle
+If there is no recent activity yet, the table is replaced with an empty state.
 
-| Status | Meaning |
-|--------|---------|
-| `queued` | Instance created, provisioning not started |
-| `provisioning` | Currently being set up |
-| `active` | Live and accessible |
-| `paused` | Temporarily disabled (shows holding page) |
-| `failed` | Provisioning failed (see logs) |
+## New Instance Modal
 
-### Creating Instances
+The `New Instance` modal appears from the active dashboard and the Instances page.
 
-From the dashboard or instances page: "New Instance" → enter an identifier (subdomain or folder name depending on configured adapter), optional name and email → Swarm provisions immediately.
+Important gating behavior:
 
-The modal adapts to the configured adapter:
-- **Domain adapters** (Nginx, Forge, cPanel, Plesk): Shows a subdomain input with `.basedomain.com` suffix and live preview
-- **Filesystem adapter**: Shows the instances root path prefix with a folder name input
+- If no prepared template exists yet, the modal does not open.
+- Instead, the UI shows a confirmation dialog that sends the operator to `Templates`.
 
-Implementation note: the controller has a gallery-marking endpoint, but the current operator UI does not expose a "Mark as Gallery Demo" action.
+### Local Adapter Variant
 
-## Template Management (`/operator/templates`)
+When `Filesystem (Local)` is selected in Deployment:
 
-Manage VoxelSite versions from the dashboard. Two sections:
+- Title: `New Instance`
+- Subtitle: deploy to the filesystem
+- Required field: `Folder Name`
+- Optional fields:
+  - `Name`
+  - `Email`
+- The modal shows the current instances root path as a prefix before the folder name input.
+- Folder names are limited to lowercase letters, numbers, and hyphens.
+- If `Email` is left empty, the operator email is used as the fallback value.
+
+### Domain Adapter Variant
+
+When `Nginx`, `Forge`, `cPanel`, or `Plesk` is selected:
+
+- Required field: `Subdomain`
+- The modal shows `.{base_domain}` as the suffix
+- A live preview updates as you type
+- Optional fields remain `Name` and `Email`
+- Subdomains are limited to lowercase letters, numbers, and hyphens.
+- If `Email` is left empty, the operator email is used as the fallback value.
+
+On successful submit:
+
+- The instance is created immediately
+- The browser redirects to `/operator/instances/{id}`
+
+## Instances (`/operator/instances`)
+
+This is the main instance management page.
+
+What you see:
+
+- Header with `New Instance`
+- Search field for name or email
+- Status filter dropdown
+- Current result count
+- Clickable table rows when instances exist
+
+Table columns:
+
+- `Identifier`
+- `Name`
+- `Email`
+- `Status`
+- `Type`
+- `Created`
+
+Empty states:
+
+- `No instances yet` when nothing exists
+- `No matches` when filters/search exclude all rows
+
+Implementation note:
+
+- The controller supports a `type` filter in the query string, but the current UI does not expose a type filter control.
+
+## Instance Detail (`/operator/instances/{id}`)
+
+This page is the operator view for one instance.
+
+### Header
+
+- Instance name
+- Status badge with colored dot
+- Slug in monospace
+- Live URL link when the instance is active
+
+### Actions
+
+- `Pause` appears only when status is `active`
+- `Resume` appears only when status is `paused`
+- `Delete` is always available
+
+Adapter caveat:
+
+- Nginx pause/resume rewrites the server config into and out of a maintenance response
+- The local adapter only logs pause/resume
+- Forge, cPanel, and Plesk currently log warnings instead of fully toggling site availability
+
+### Instance Details Card
+
+Rows shown in the card:
+
+- `Identifier`
+- `URL`
+- `Email`
+- `Type`
+- `Created`
+- `Provisioned`
+
+### Notes
+
+- Private operator-only notes
+- Saved in place with `Save Notes`
+
+### Provision Log
+
+Shows step-by-step deployment history for the instance.
+
+Columns:
+
+- `Step`
+- `Status`
+- `Duration`
+- `Error`
+- `Time`
+
+If no rows exist yet, the page shows a log empty state instead of the table.
+
+## Templates (`/operator/templates`)
+
+This page has two cards: `Prepared Versions` and `Available ZIPs`.
 
 ### Prepared Versions
 
-Shows all extracted VoxelSite versions:
-- **Version number**, directory name, size on disk
-- **Active badge** — the version used for new instances
-- **Actions:** Activate (switch new instances to this version), Delete
+This is the top card.
 
-The **active** version cannot be deleted. Existing instances are not affected by version changes — they contain their own VoxelSite installation.
+When no prepared template exists yet:
+
+- The page shows a `No template yet` empty state
+- It explains the 3 steps:
+  - upload a VoxelSite ZIP
+  - process it
+  - activate it
+
+When prepared versions exist:
+
+- Each version row shows:
+  - version number
+  - backing directory
+  - size
+  - active badge when applicable
+- Non-active versions can be:
+  - activated
+  - deleted
+- The active version cannot be deleted
 
 ### Available ZIPs
 
-Shows VoxelSite ZIP files in `template/voxelsite/`:
-- **Filename**, file size, modification date
-- **Process** — extracts the ZIP, reads the `VERSION` file inside, prepares the template, sets up image library, activates the version
-- **Delete** — removes the ZIP file
+This is the lower card.
 
-ZIPs can have any filename (e.g., `codecanyon-yi8z1J7A-...zip`). VoxelSwarm reads the `VERSION` file from inside the ZIP to determine the version.
+When no ZIP files exist in `template/voxelsite/`:
 
-Upload ZIPs to the server via FTP/SSH, then process them from this page.
+- The page shows a `No ZIP files found` empty state
+
+When ZIPs exist:
+
+- Each row shows:
+  - filename
+  - size
+  - modified timestamp
+- Available actions:
+  - `Process`
+  - `Delete`
+
+Processing a ZIP:
+
+- extracts it
+- reads the internal `VERSION` file
+- prepares the template
+- activates that version for future instances
 
 ## Deployment (`/operator/deployment`)
 
-| Section | What you configure |
-|---------|-------------------|
-| **Adapter** | Control panel adapter + adapter-specific config. "Test Connection" tests the currently visible form values, not just the saved ones. |
-| **Public Site** | Landing page toggle + signups toggle |
-| **Notifications** | Email driver (SMTP / Log / Disabled) + SMTP config + "Send Test Email" |
+This page controls how instances are provisioned, what visitors see, and how the system sends email.
+
+It has three sections.
+
+### Adapter
+
+This section always shows:
+
+- `Control Panel` dropdown
+- `Test Connection` button
+
+The currently exposed adapter choices are:
+
+- `Filesystem (Local)`
+- `Nginx (Direct Config)`
+- `Laravel Forge`
+- `cPanel / WHM`
+- `Plesk`
+
+The fields below the dropdown change by adapter.
+
+#### Filesystem (Local)
+
+Shows:
+
+- `Instances Path`
+- `Instance Limit`
+
+No `Base Domain` field is shown in the current local-adapter Deployment UI.
+
+#### Nginx
+
+Shows:
+
+- `Conf Directory`
+- `Reload Command`
+- `SSL Certificate`
+- `SSL Key`
+- `Base Domain`
+- `Instance Limit`
+
+#### Forge
+
+Shows:
+
+- `API Token`
+- `Server ID`
+- `Base Domain`
+- `Instance Limit`
+
+#### cPanel / WHM
+
+Shows:
+
+- `WHM Hostname`
+- `API Token`
+- `Base Domain`
+- `Instance Limit`
+
+#### Plesk
+
+Shows:
+
+- `Hostname`
+- `API Key`
+- `Base Domain`
+- `Instance Limit`
+
+Behavior details:
+
+- `Test Connection` tests the values currently visible in the form, even if they are not saved yet.
+- Switching between local and domain adapters changes whether the page shows a shared `Base Domain` block or the simplified local instance-limit field.
+
+### Public Site
+
+This section controls the public-facing root URL.
+
+Fields:
+
+- `Show landing page`
+- `Accept signups`
+
+Behavior matrix:
+
+| Show landing page | Accept signups | Result |
+|-------------------|----------------|--------|
+| Off | Off or On | `/` redirects to `/operator/login`. The signups toggle is visually disabled. |
+| On | Off | `/` shows the landing page, but signup CTAs switch to a disabled/coming-soon state and `/signup` shows a `Coming soon` message. |
+| On | On | `/` shows the landing page and `/signup` shows the public signup form. |
+
+Important limitation:
+
+- The public gallery is not configured here. `gallery_enabled` exists in code, but there is no dashboard toggle for it yet.
+
+### Notifications
+
+This section controls email behavior.
+
+Fields:
+
+- `Email Driver`
+- `Send Test Email`
+
+When `Email Driver` is `SMTP`, extra fields appear:
+
+- `SMTP Host`
+- `Port`
+- `Username`
+- `Password`
+- `From Address`
+- `From Name`
+
+When `Email Driver` is `Log to file` or `Disabled`, the SMTP fields stay hidden.
 
 ## Account (`/operator/account`)
 
-| Section | What you configure |
-|---------|-------------------|
-| **Email Address** | Operator email. Receives system notifications. |
-| **Password** | Current + new password. |
+This page has two cards.
+
+### Email Address
+
+Shows:
+
+- `Email`
+
+This address receives failure alerts and system notifications.
+
+### Password
+
+Shows:
+
+- `Current Password`
+- `New Password`
+
+Behavior details:
+
+- Leave both fields empty to keep the current password
+- A new password must be at least 8 characters
+- The current password is required only when changing the password
 
 ## System (`/operator/system`)
 
-| Section | What you see |
-|---------|-------------------|
-| **System Status** | VoxelSwarm version, PHP version, SQLite version, database size |
-| **Update** | Git availability, `Pull Latest`, and raw pull output |
-| **Server Logs** | Download and delete `.log` files from `storage/logs/` |
-| **Danger Zone** | Refresh Installation (purge instances but keep account/settings), Reset Installation (full wipe) |
+This page has four sections.
 
-## Logs
+### System Status
 
-Logs are stored in `storage/logs/` with daily rotation:
+Shows:
 
-| Log file | Contents |
-|----------|----------|
-| `provision-YYYY-MM-DD.log` | Every provisioning step |
-| `adapter-YYYY-MM-DD.log` | Control panel API calls |
-| `swarm-YYYY-MM-DD.log` | Settings changes, operator actions |
-| `mail-YYYY-MM-DD.log` | Email sends and failures |
+- `VoxelSwarm`
+- `PHP`
+- `SQLite`
+- `Database`
 
-The System page can download or delete `.log` files. Retention is still manual or external to the app.
+### Update
+
+Shows:
+
+- Current app version badge
+- Git availability state
+- `Pull Latest` when the app is running inside a Git repository
+
+If Git is available:
+
+- Pull output is shown inline after the action runs
+
+If Git is not available:
+
+- The page shows a note that the installation is not a Git repository
+
+### Server Logs
+
+When no `.log` files exist yet:
+
+- The page shows a `No log files yet` empty state
+
+When logs exist:
+
+- A table appears with:
+  - `File`
+  - `Size`
+  - `Modified`
+  - row actions
+- Row actions:
+  - download
+  - delete
+- `Delete All` appears only when at least one log file exists
+
+### Danger Zone
+
+Two destructive actions are available:
+
+- `Refresh Installation`
+  - Deletes instances, logs, ZIPs, and processed templates
+  - Keeps the account and settings
+- `Reset Installation`
+  - Wipes the database and files
+  - Sends the app back to the install wizard
+
+Both actions require password confirmation in a modal before execution.
+
+## Public Pages Controlled By Deployment
+
+These pages are not part of the operator layout. The landing page and signup flow are controlled from `Deployment > Public Site`. The gallery is separate and currently controlled only by the `gallery_enabled` setting in code.
+
+### Landing Page (`/`)
+
+Visible only when `Show landing page` is enabled.
+
+Main content:
+
+- Hero
+- marketing sections
+- CTA buttons
+- `Gallery` link
+- `Operator` link
+
+The CTA behavior depends on `Accept signups`.
+
+### Signup Page (`/signup`)
+
+Visible only when the public site is enabled.
+
+States:
+
+- `Create your workspace` form when signups are enabled
+- `Coming soon` message when signups are disabled
+
+### Status Page (`/status/{id}`)
+
+Visible after a public signup creates an instance.
+
+States:
+
+- in-progress polling state
+- success state with workspace CTA
+- failure state
+- not-found state
+
+### Gallery (`/gallery`)
+
+Visible only when `gallery_enabled=true`.
+
+If enabled:
+
+- Shows active gallery instances in a grid
+- Uses thumbnail images from `storage/gallery/` when present
+
+If disabled:
+
+- The controller returns a 404-style unavailable response
+
+## Logging
+
+Log files are written to `storage/logs/` with daily rotation by channel:
+
+- `provision-YYYY-MM-DD.log`
+- `adapter-YYYY-MM-DD.log`
+- `swarm-YYYY-MM-DD.log`
+- `mail-YYYY-MM-DD.log`
+
+See [troubleshooting.md](troubleshooting.md) for channel-by-channel details.

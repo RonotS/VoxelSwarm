@@ -1,5 +1,7 @@
 # Troubleshooting
 
+Before filing a bug report, read [testing-feedback.md](testing-feedback.md). That page explains the early-access testing model, why the logs exist, and what information to include so an issue is actionable.
+
 ## Provisioning Issues
 
 ### Instance stuck in "provisioning" status
@@ -160,7 +162,7 @@ Levels: `INFO` (normal operations), `WARNING` (non-fatal issues — email failur
 
 ### Managing logs
 
-- **View in the dashboard:** System → System Status shows recent log activity
+- **View in the dashboard:** System → Server Logs
 - **Download:** System → download individual log files
 - **Delete:** System → delete old log files, or delete all at once
 - **Manual access:** `cat storage/logs/provision-2026-03-04.log` via SSH
@@ -171,6 +173,8 @@ Levels: `INFO` (normal operations), `WARNING` (non-fatal issues — email failur
 ## Reporting an Issue
 
 VoxelSwarm runs on hosting environments we can't all test ourselves — your bug reports keep the project alive. A well-structured report saves hours of back-and-forth.
+
+Prefer [testing-feedback.md](testing-feedback.md) as the canonical reporting guide. This section remains as a troubleshooting-oriented checklist.
 
 ### Before you report
 

@@ -4,7 +4,7 @@
 
 VoxelSwarm is a free, open-source deployment layer that turns one [VoxelSite](https://voxelsite.com) installation into a multi-tenant platform. Each user gets their own isolated hosting account, their own AI website builder, their own API key. No SaaS. No shared infrastructure. No middlemen.
 
-> ⚠️ **Early Access** — VoxelSwarm requires extensive testing across different hosting environments and control panels. Please [report issues](https://github.com/NowSquare/VoxelSwarm/issues). A regular VoxelSite license is all you need for testing.
+> ⚠️ **Early Access** — VoxelSwarm requires extensive testing across different hosting environments and control panels. Please read [docs/testing-feedback.md](docs/testing-feedback.md) before reporting issues. A regular VoxelSite license is all you need for testing.
 
 ---
 
@@ -124,6 +124,8 @@ VoxelSwarm/
 |-------|------|
 | **Installation** | [docs/installation.md](docs/installation.md) |
 | **Configuration** | [docs/configuration.md](docs/configuration.md) |
+| **Page Map** | [docs/page-map.md](docs/page-map.md) |
+| **Testing & Feedback** | [docs/testing-feedback.md](docs/testing-feedback.md) |
 | **Template Preparation** | [docs/template-preparation.md](docs/template-preparation.md) |
 | **Operator Dashboard** | [docs/operator-dashboard.md](docs/operator-dashboard.md) |
 | **Adapters Overview** | [docs/adapters/README.md](docs/adapters/README.md) |
@@ -145,7 +147,7 @@ To deploy instances, you need a VoxelSite license — [voxelsite.com/buy](https:
 
 VoxelSwarm is open source because the only way to make it work on every hosting environment is to let people test it on their hosting environment. Contributions are welcome:
 
-- **Report bugs** — [Open an issue](https://github.com/NowSquare/VoxelSwarm/issues) with your hosting setup details
+- **Report bugs** — Start with [docs/testing-feedback.md](docs/testing-feedback.md), then [open an issue](https://github.com/NowSquare/VoxelSwarm/issues)
 - **Write an adapter** — See [docs/adapters/writing-an-adapter.md](docs/adapters/writing-an-adapter.md)
 - **Fix edge cases** — Every control panel has quirks. Your PR helps everyone
 - **Improve docs** — Clearer instructions save hours of debugging
@@ -156,8 +158,8 @@ Please read [CONTRIBUTING.md](CONTRIBUTING.md) before submitting a pull request.
 
 ## Support
 
-- **Check the logs:** `storage/logs/` contains detailed, structured logs for every provisioning step, adapter call, email, and operator action. See [Troubleshooting → Log Files](docs/troubleshooting.md#log-files) for what each log captures.
-- **Report a bug:** [github.com/NowSquare/VoxelSwarm/issues](https://github.com/NowSquare/VoxelSwarm/issues) — include your environment, steps to reproduce, and relevant log entries. See [Reporting an Issue](docs/troubleshooting.md#reporting-an-issue) for what to include.
+- **Check the logs:** `storage/logs/` contains detailed, structured logs for every provisioning step, adapter call, email, and operator action. See [Testing & Feedback](docs/testing-feedback.md) and [Troubleshooting → Log Files](docs/troubleshooting.md#log-files).
+- **Report a bug:** Start with [docs/testing-feedback.md](docs/testing-feedback.md), then open an issue at [github.com/NowSquare/VoxelSwarm/issues](https://github.com/NowSquare/VoxelSwarm/issues).
 - **VoxelSite:** [voxelsite.com](https://voxelsite.com) — for VoxelSite-specific issues (the AI builder, not VoxelSwarm)
 - **Multi-Site:** [voxelsite.com/multi-site](https://voxelsite.com/multi-site)
 

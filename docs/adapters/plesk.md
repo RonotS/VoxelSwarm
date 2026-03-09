@@ -44,3 +44,5 @@ If you're running Plesk, please test VoxelSwarm and [report any issues](https://
 - Your Plesk version and edition
 - Server OS
 - Any error messages from `storage/logs/adapter-YYYY-MM-DD.log`
+
+See [../testing-feedback.md](../testing-feedback.md) for the full reporting checklist and the reasoning behind the logging model.
