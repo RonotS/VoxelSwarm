@@ -5,6 +5,7 @@ RUN apk add --no-cache \
     nginx \
     supervisor \
     curl \
+    curl-dev \
     sqlite-dev \
     libzip-dev \
     oniguruma-dev \
@@ -13,7 +14,6 @@ RUN apk add --no-cache \
     mbstring \
     fileinfo \
     zip \
-    curl \
     opcache
 
 # Set working directory
