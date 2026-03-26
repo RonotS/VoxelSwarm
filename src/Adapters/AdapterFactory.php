@@ -30,6 +30,7 @@ class AdapterFactory
         return match ($adapter) {
             'local'       => new LocalAdapter($config),
             'nginx'       => new NginxAdapter($config),
+            'railway'     => new RailwayAdapter($config),
             'forge'       => new ForgeAdapter($config),
             'cpanel'      => new CpanelAdapter($config),
             'plesk'       => new PleskAdapter($config),

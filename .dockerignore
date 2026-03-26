@@ -1,0 +1,23 @@
+# Git
+.git/
+.gitattributes
+
+# Documentation (not needed at runtime)
+docs/
+CONTRIBUTING.md
+
+# Development files
+node_modules/
+package.json
+package-lock.json
+.env
+
+# Storage data (lives on Railway volume, not in image)
+storage/swarm.db
+storage/logs/*
+storage/instances/*
+
+# OS files
+.DS_Store
+Thumbs.db
+
