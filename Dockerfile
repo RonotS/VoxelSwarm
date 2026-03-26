@@ -32,9 +32,16 @@ COPY docker/supervisord.conf /etc/supervisord.conf
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# PHP-FPM config: listen on port 9000
-RUN sed -i 's/listen = 127.0.0.1:9000/listen = 9000/' /usr/local/etc/php-fpm.d/www.conf 2>/dev/null || true
-RUN echo "listen = 9000" >> /usr/local/etc/php-fpm.d/zz-docker.conf 2>/dev/null || true
+# Create a unified start script (Railway may skip ENTRYPOINT)
+RUN printf '#!/bin/sh\n/entrypoint.sh\nexec supervisord -c /etc/supervisord.conf\n' > /start.sh && chmod +x /start.sh
+
+# PHP-FPM config: overwrite default to ensure correct listen address
+RUN echo '[global]' > /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'daemonize = no' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo '[www]' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'listen = 127.0.0.1:9000' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'user = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'group = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
 # PHP config optimizations
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
@@ -46,5 +53,4 @@ RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
 # Expose Railway's expected port
 EXPOSE 8080
 
-ENTRYPOINT ["/entrypoint.sh"]
-CMD ["supervisord", "-c", "/etc/supervisord.conf"]
+CMD ["/start.sh"]
