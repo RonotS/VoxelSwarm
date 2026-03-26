@@ -38,10 +38,15 @@ RUN printf '#!/bin/sh\n/entrypoint.sh\nexec supervisord -c /etc/supervisord.conf
 # PHP-FPM config: overwrite default to ensure correct listen address
 RUN echo '[global]' > /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'daemonize = no' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'error_log = /dev/stderr' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo '[www]' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'listen = 127.0.0.1:9000' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'user = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'group = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf
+    echo 'group = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'catch_workers_output = yes' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'php_flag[display_errors] = on' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'php_admin_value[error_log] = /dev/stderr' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'php_admin_flag[log_errors] = on' >> /usr/local/etc/php-fpm.d/zz-docker.conf
 
 # PHP config optimizations
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
