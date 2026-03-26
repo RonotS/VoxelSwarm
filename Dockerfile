@@ -24,7 +24,7 @@ COPY . /app
 
 # Create required directories
 RUN mkdir -p /data/logs /data/instances /data/template/voxelsite /data/library \
-    && mkdir -p /app/storage /app/template /run/nginx
+    && mkdir -p /app/storage /app/template /run/nginx /run/php
 
 # Copy Docker config files
 COPY docker/nginx.conf /etc/nginx/nginx.conf
@@ -35,12 +35,13 @@ RUN chmod +x /entrypoint.sh
 # Create a unified start script (Railway may skip ENTRYPOINT)
 RUN printf '#!/bin/sh\n/entrypoint.sh\nexec supervisord -c /etc/supervisord.conf\n' > /start.sh && chmod +x /start.sh
 
-# PHP-FPM config: overwrite default to ensure correct listen address
+# PHP-FPM config: use Unix socket for reliable nginx<->fpm communication
 RUN echo '[global]' > /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'daemonize = no' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'error_log = /dev/stderr' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo '[www]' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'listen = 127.0.0.1:9000' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'listen = /run/php/php-fpm.sock' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
+    echo 'listen.mode = 0666' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'user = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'group = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
     echo 'catch_workers_output = yes' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \

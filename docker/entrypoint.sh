@@ -3,6 +3,9 @@ set -e
 
 echo "==> VoxelSwarm: Preparing persistent storage..."
 
+# Ensure runtime dirs exist for PHP-FPM socket
+mkdir -p /run/php /run/nginx
+
 # Ensure volume directories exist
 mkdir -p /data/logs
 mkdir -p /data/instances
