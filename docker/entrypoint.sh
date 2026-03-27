@@ -29,6 +29,12 @@ if [ ! -L /app/library ] || [ "$(readlink /app/library)" != "/data/library" ]; t
     ln -sfn /data/library /app/library
 fi
 
+# Copy bundled template to volume if not already there
+if [ -d /app/template/voxelsite ] && [ ! -f /data/template/voxelsite/voxelsite-v1.27.0.zip ]; then
+    echo "==> First deploy: copying voxelsite template to volume..."
+    cp -a /app/template/voxelsite/* /data/template/voxelsite/ 2>/dev/null || true
+fi
+
 # Handle SQLite database
 if [ ! -f /data/swarm.db ]; then
     echo "==> First deploy: creating empty database..."
