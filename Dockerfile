@@ -1,11 +1,8 @@
-FROM php:8.2-fpm-alpine
+FROM php:8.2-cli-alpine
 
-# Install system dependencies
+# Install system dependencies and PHP extensions
 RUN apk add --no-cache \
-    nginx \
-    supervisor \
     curl \
-    curl-dev \
     sqlite-dev \
     libzip-dev \
     oniguruma-dev \
@@ -24,39 +21,25 @@ COPY . /app
 
 # Create required directories
 RUN mkdir -p /data/logs /data/instances /data/template/voxelsite /data/library \
-    && mkdir -p /app/storage /app/template /run/nginx /run/php
+    && mkdir -p /app/storage /app/template
 
-# Copy Docker config files
-COPY docker/nginx.conf /etc/nginx/nginx.conf
-COPY docker/supervisord.conf /etc/supervisord.conf
+# Copy entrypoint
 COPY docker/entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Create a unified start script (Railway may skip ENTRYPOINT)
-RUN printf '#!/bin/sh\n/entrypoint.sh\nexec supervisord -c /etc/supervisord.conf\n' > /start.sh && chmod +x /start.sh
+# Create start script
+RUN printf '#!/bin/sh\nset -e\n/entrypoint.sh\necho "==> Starting PHP built-in server on port 8080..."\nexec php -S 0.0.0.0:8080 -t /app /app/index.php\n' > /start.sh && chmod +x /start.sh
 
-# PHP-FPM config: use Unix socket for reliable nginx<->fpm communication
-RUN echo '[global]' > /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'daemonize = no' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'error_log = /dev/stderr' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo '[www]' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'listen = /run/php/php-fpm.sock' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'listen.mode = 0666' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'user = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'group = root' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'catch_workers_output = yes' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'php_flag[display_errors] = on' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'php_admin_value[error_log] = /dev/stderr' >> /usr/local/etc/php-fpm.d/zz-docker.conf && \
-    echo 'php_admin_flag[log_errors] = on' >> /usr/local/etc/php-fpm.d/zz-docker.conf
-
-# PHP config optimizations
+# PHP config
 RUN echo "opcache.enable=1" >> /usr/local/etc/php/conf.d/opcache.ini \
     && echo "opcache.memory_consumption=128" >> /usr/local/etc/php/conf.d/opcache.ini \
-    && echo "opcache.max_accelerated_files=10000" >> /usr/local/etc/php/conf.d/opcache.ini \
     && echo "upload_max_filesize=64M" >> /usr/local/etc/php/conf.d/uploads.ini \
-    && echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/uploads.ini
+    && echo "post_max_size=64M" >> /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "display_errors=On" >> /usr/local/etc/php/conf.d/errors.ini \
+    && echo "error_reporting=E_ALL" >> /usr/local/etc/php/conf.d/errors.ini \
+    && echo "log_errors=On" >> /usr/local/etc/php/conf.d/errors.ini \
+    && echo "error_log=/dev/stderr" >> /usr/local/etc/php/conf.d/errors.ini
 
-# Expose Railway's expected port
 EXPOSE 8080
 
 CMD ["/start.sh"]
