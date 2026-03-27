@@ -17,8 +17,14 @@ mkdir -p /data/library
 ln -sfn /data/logs      /app/storage/logs
 ln -sfn /data/instances /app/storage/instances
 
+# Copy bundled template to volume BEFORE symlinking (so the source still exists)
+if [ -d /app/template/voxelsite ] && [ ! -L /app/template/voxelsite ] && [ ! -f /data/template/voxelsite/voxelsite-v1.27.0.zip ]; then
+    echo "==> First deploy: copying voxelsite template to volume..."
+    cp -a /app/template/voxelsite/* /data/template/voxelsite/ 2>/dev/null || true
+fi
+
 # Symlink template and library directories
-# Only link if the target isn't already a directory with content from the volume
+# Only link if the target isn't already a symlink to the volume
 if [ ! -L /app/template/voxelsite ] || [ "$(readlink /app/template/voxelsite)" != "/data/template/voxelsite" ]; then
     rm -rf /app/template/voxelsite
     ln -sfn /data/template/voxelsite /app/template/voxelsite
@@ -27,12 +33,6 @@ fi
 if [ ! -L /app/library ] || [ "$(readlink /app/library)" != "/data/library" ]; then
     rm -rf /app/library
     ln -sfn /data/library /app/library
-fi
-
-# Copy bundled template to volume if not already there
-if [ -d /app/template/voxelsite ] && [ ! -f /data/template/voxelsite/voxelsite-v1.27.0.zip ]; then
-    echo "==> First deploy: copying voxelsite template to volume..."
-    cp -a /app/template/voxelsite/* /data/template/voxelsite/ 2>/dev/null || true
 fi
 
 # Handle SQLite database
