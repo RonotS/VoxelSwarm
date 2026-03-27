@@ -67,11 +67,11 @@ class Provisioner
                 $adapter->createSubdomain($instance['slug'], $instancePath);
             });
 
-            // Step 4: Health check (skip for local adapter — no real subdomain)
+            // Step 4: Health check (skip for local/railway adapter — routing is internal)
             self::runStep($instanceId, 'health_check', function () use ($instance) {
                 $adapter = Setting::get('control_panel_adapter', 'nginx');
-                if ($adapter === 'local') {
-                    Logger::info('provision', 'Health check skipped (local adapter)', [
+                if ($adapter === 'local' || $adapter === 'railway') {
+                    Logger::info('provision', 'Health check skipped (' . $adapter . ' adapter)', [
                         'slug' => $instance['slug'],
                     ]);
                     return;
